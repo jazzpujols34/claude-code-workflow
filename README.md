@@ -16,7 +16,7 @@ your-project/
 ├── HANDOVER.md            # Session relay — ephemeral baton between sessions
 ├── DASHBOARD.md           # Cross-project status — priorities, blockers, wins
 └── .claude/
-    ├── pm-handbook.md     # PM playbook — status checks, priorities, inception
+    ├── pm-handbook.md     # PM playbook — status checks, priorities, security, production safety
     ├── soul.md            # Personality layer — communication style, values
     ├── skills/            # Decision frameworks — reusable strategic thinking
     │   ├── should-i-build-this.md
@@ -35,7 +35,7 @@ your-project/
 | `CLAUDE.md` | Project context, coding standards, learned rules | Every session (auto-loaded) |
 | `HANDOVER.md` | What happened last session, exact next steps | Start of new session, then deleted |
 | `DASHBOARD.md` | All projects at a glance, priority stack | When planning what to work on |
-| `pm-handbook.md` | How to check status, set priorities, start new projects | When doing PM work |
+| `pm-handbook.md` | How to check status, set priorities, start projects, run security audits | When doing PM work |
 | `soul.md` | Communication preferences, values, what to avoid | Every session (referenced by CLAUDE.md) |
 | `skills/*.md` | Structured decision frameworks | Before strategic decisions |
 | `knowledge/*.md` | Technical patterns and gotchas | When working on related features |
@@ -45,7 +45,7 @@ your-project/
 
 This system was used to build **12+ projects in ~2 months**, with 3+ deployed to production with live payments. Including:
 
-- An AI memorial video platform (Next.js, Cloudflare Pages, Stripe/ECPay)
+- An AI memorial video platform (Next.js, Cloudflare Pages, ECPay)
 - A podcast transcription pipeline (Python, 100+ episodes processed)
 - A vocabulary learning app (React Native, Expo)
 - An AI art gallery with auth and admin (React + FastAPI)
@@ -55,49 +55,46 @@ The speed comes from **compounding context** — each session builds on the last
 
 ## Quick Start
 
-### Option 1: Copy the essentials (5 minutes)
+### Option 1: Just CLAUDE.md (2 minutes, 80% of the benefit)
 
 ```bash
-# In your project root
-mkdir -p .claude/skills .claude/knowledge
-
-# Copy the three core files
-cp templates/CLAUDE.md ./CLAUDE.md        # Edit for your project
-cp templates/HANDOVER.md ./HANDOVER.md    # Use as-is
-cp templates/DASHBOARD.md ./DASHBOARD.md  # Edit for your projects
+cp templates/CLAUDE.md ./CLAUDE.md
 ```
 
-Then edit `CLAUDE.md` with your project's specifics.
+Edit with your project's specifics. Done.
 
-### Option 2: Full system (15 minutes)
+### Option 2: Copy the essentials (5 minutes)
 
 ```bash
-# Copy everything
+mkdir -p .claude/skills .claude/knowledge
+
+cp templates/CLAUDE.md ./CLAUDE.md
+cp templates/HANDOVER.md ./HANDOVER.md
+cp templates/DASHBOARD.md ./DASHBOARD.md
+```
+
+### Option 3: Full system (15 minutes)
+
+```bash
+mkdir -p .claude/skills .claude/knowledge
+
+# Core files
 cp templates/CLAUDE.md ./CLAUDE.md
 cp templates/HANDOVER.md ./HANDOVER.md
 cp templates/DASHBOARD.md ./DASHBOARD.md
 
-# PM system
+# PM system + personality
 cp templates/pm-handbook.md ./.claude/pm-handbook.md
+cp templates/soul.md ./.claude/soul.md
 
 # Decision frameworks
 cp skills/*.md ./.claude/skills/
 
-# Automations
-cp scripts/automations-template.sh ./setup-automations.sh
+# Automations (see install instructions inside the file)
+cp scripts/automations-template.sh ~/.claude-automations.sh
 ```
 
-Edit each file to match your project. The templates have `[PLACEHOLDER]` markers for everything you need to customize.
-
-### Option 3: Just CLAUDE.md (2 minutes)
-
-If you want to start minimal:
-
-```bash
-cp templates/CLAUDE.md ./CLAUDE.md
-```
-
-This single file gives you 80% of the benefit. Add the rest as you feel the need.
+Edit each file — templates have `[PLACEHOLDER]` markers for everything you need to customize.
 
 ## How It Works
 
@@ -121,7 +118,13 @@ Context windows have limits. When one session ends, write a `HANDOVER.md`. The n
 
 This turns Claude Code from a "single session tool" into a **persistent development partner**.
 
-### 3. Skills — Reusable Decision Frameworks
+See [examples/real-handover.md](examples/real-handover.md) for a real-world example.
+
+### 3. soul.md — The Personality Layer
+
+Defines how Claude communicates with you — direct vs. detailed, when to push back, what to avoid. Without it, Claude defaults to generic helpful assistant mode. With it, Claude matches your working style.
+
+### 4. Skills — Reusable Decision Frameworks
 
 Instead of re-thinking "should I build this?" every time, encode your decision process once:
 
@@ -131,27 +134,47 @@ Read .claude/skills/should-i-build-this.md and evaluate: "An app that tracks rea
 
 Claude runs your framework and gives you a structured verdict. Same quality decision every time, zero cognitive load.
 
-### 4. Knowledge — Technical Memory
+### 5. Knowledge — Technical Memory
 
 Every hard-won lesson gets captured:
 
 ```
-Read .claude/knowledge/cloudflare-edge-patterns.md before implementing the API route
+Read .claude/knowledge/edge-runtime-patterns.md before implementing the API route
 ```
 
-You learn something once. Claude remembers it forever.
+You learn something once. Claude remembers it forever. See `knowledge/` for real examples.
 
-### 5. Compound Automation
+### 6. PM Handbook — The Full Playbook
 
-Shell scripts that orchestrate multi-step Claude Code workflows:
+10 chapters covering the complete project lifecycle:
+
+| Chapter | Topic |
+|---------|-------|
+| 1 | Foundation — project inventory |
+| 2 | Status Check Protocol |
+| 3 | Priority Framework |
+| 4 | New Project Inception |
+| 5 | Session Handover Protocol |
+| 6 | Security Audit (pre-launch checklist) |
+| 7 | Skills & Knowledge System |
+| 8 | Dashboard Update Protocol |
+| 9 | Security Audit Protocol (detailed checklist) |
+| 10 | Production Safety Framework (6-layer defense) |
+
+### 7. Compound Automation
+
+Shell aliases that orchestrate multi-step workflows:
 
 ```bash
-# Morning briefing
 morning    # Reads DASHBOARD.md, gives top 3 priorities
-
-# Evaluate new idea
-evaluate "An app that helps people track reading habits"
+status     # Current state of all projects
+evaluate "An app that tracks reading habits"
+audit "my-project"    # Run security checklist
+handover   # Write session handover
+learn "Edge Workers can't use Node.js crypto"
 ```
+
+See [scripts/automations-template.sh](scripts/automations-template.sh) for installation instructions.
 
 ## File Reference
 
@@ -160,7 +183,8 @@ templates/
 ├── CLAUDE.md              # Starter CLAUDE.md with all sections
 ├── HANDOVER.md            # Session handover template
 ├── DASHBOARD.md           # Multi-project dashboard template
-└── pm-handbook.md         # PM playbook template
+├── pm-handbook.md         # PM playbook (10 chapters)
+└── soul.md                # Communication style & values template
 
 skills/
 ├── should-i-build-this.md # Evaluate new project ideas
@@ -169,14 +193,17 @@ skills/
 └── mvp-launch-checklist.md # Pre-launch checklist
 
 knowledge/
-└── example-learning.md    # Template for capturing learnings
+├── example-learning.md    # Template for capturing learnings
+├── edge-runtime-patterns.md  # Edge/serverless constraints & workarounds
+└── payment-integration.md    # Payment provider patterns & gotchas
 
 scripts/
-└── automations-template.sh # Shell aliases for daily workflow
+└── automations-template.sh # Shell aliases (with install instructions)
 
 examples/
 ├── monorepo-claude-md.md  # Real CLAUDE.md from a 12-project monorepo
-└── project-claude-md.md   # Real CLAUDE.md from a deployed Next.js app
+├── project-claude-md.md   # Real CLAUDE.md from a deployed Next.js app
+└── real-handover.md       # Real HANDOVER.md from a production session
 
 docs/
 └── how-it-works.md        # Deep dive on each component
@@ -208,9 +235,9 @@ Before building any feature:
 
 ### 3. Challenge the problem before solving it
 
-The PM handbook's inception process (Chapter 7):
-1. **Question requirements** — What problem? Who needs it? What exists?
-2. **Try to delete** — For every feature: "what if we remove this?"
+The PM handbook's inception process (Chapter 4):
+1. **Question the requirements** — What problem? Who needs it? What exists?
+2. **Try to delete** — For every feature: "what if we remove this entirely?"
 3. **Simplify** — Only after deleting
 4. **Speed up** — Only after simplifying
 5. **Automate** — Last step, not first
@@ -218,6 +245,16 @@ The PM handbook's inception process (Chapter 7):
 ### 4. Ship beats perfect
 
 The `ship-or-iterate` skill encodes this: if the core value prop works and 3 users can complete the main flow, **ship it**. The last 20% takes 80% of the time.
+
+### 5. Defense in depth
+
+The Production Safety Framework (Chapter 10) gives you 6 layers:
+1. **Validation** — catch bad input at the edge
+2. **Error Handling** — fail gracefully, never silently
+3. **Monitoring** — know when things break before users tell you
+4. **Rate Limiting** — protect against abuse and runaway costs
+5. **Rollback** — go back to what worked in < 5 minutes
+6. **Backup** — the last line of defense (test your restores)
 
 ## FAQ
 
@@ -232,6 +269,17 @@ A: Start with just `CLAUDE.md`. Add the rest when you feel the friction.
 
 **Q: Can I use this with other AI coding tools?**
 A: The concepts (persistent context, session handover, decision frameworks) apply to any AI coding tool. The file format is Claude Code specific.
+
+**Q: What if my context window fills up mid-session?**
+A: Write a HANDOVER.md immediately. Include what you were doing, current state, and exact next steps. Start a new session, read the handover, delete it, and continue.
+
+**Q: How do I know the system is working?**
+A: You'll notice: sessions start faster (no re-explaining), mistakes don't repeat (learned rules), decisions are consistent (skills), and context survives across sessions (handovers).
+
+## Read the full write-up
+
+- [Part 1: 3 files that make Claude Code remember your project](https://x.com/Jazzpujols34/status/2031582021152367081) (SPEC.md, CLAUDE.md, HANDOVER.md)
+- [Part 2: 3 files that turn Claude Code into your dev partner](https://x.com/Jazzpujols34/status/2031620670631596110) (soul.md, hooks, MEMORY.md)
 
 ## Contributing
 

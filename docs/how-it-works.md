@@ -81,6 +81,16 @@ Key rule: **delete after reading**. A stale HANDOVER.md from 3 sessions ago is w
 4. Key decisions made this session (and why)
 5. Gotchas discovered (so the next session doesn't hit the same wall)
 
+### What Makes a Good Handover
+
+See [examples/real-handover.md](../examples/real-handover.md) for a real-world example. The best handovers have:
+
+- **Commit hashes** — so the next session can verify what shipped
+- **Tables for bulk changes** — scannable, not buried in paragraphs
+- **"What to watch" sections** — proactive warnings, not just status
+- **Debug commands** — so the next session can verify state immediately
+- **Known issues with severity** — so the next session knows what's fragile
+
 ### Why This Beats "Just Re-explain"
 
 Re-explaining takes 5-10 minutes and loses nuance. A good HANDOVER.md takes 30 seconds to write and preserves:
@@ -89,7 +99,34 @@ Re-explaining takes 5-10 minutes and loses nuance. A good HANDOVER.md takes 30 s
 - The approach that was chosen (and why alternatives were rejected)
 - Uncommitted changes that need attention
 
-## Component 3: DASHBOARD.md — Multi-Project Awareness
+## Component 3: soul.md — Personality Layer
+
+### What It Is
+
+A file that defines how Claude communicates with you. Your working style, values, pet peeves, and preferences.
+
+### Why It Exists
+
+Without it, Claude defaults to "helpful assistant" mode — verbose, cautious, always agreeing. With soul.md, Claude adapts:
+
+- **Direct communicators** get shorter, punchier responses
+- **Detail-oriented builders** get thorough explanations
+- **"Challenge me" types** get genuine pushback on bad ideas
+- **"Ship fast" builders** get pragmatic suggestions, not perfect ones
+
+### What Goes In It
+
+- Who you are and what you're building (context)
+- Communication style (direct? detailed? humorous?)
+- Values in priority order (when values conflict, higher wins)
+- What to avoid (over-engineering, fluff, sugarcoating)
+- The "why" behind your projects (motivation)
+
+### The Key Insight
+
+The more honest your soul.md is, the better Claude adapts. It's not a resume — it's a working manual for your AI partner.
+
+## Component 4: DASHBOARD.md — Multi-Project Awareness
 
 ### What It Is
 
@@ -112,7 +149,7 @@ Rank work using these criteria (in order):
 4. **Git hygiene** — Commit before starting new work
 5. **Energy matching** — Switch projects when stuck
 
-## Component 4: Skills — Reusable Decision Frameworks
+## Component 5: Skills — Reusable Decision Frameworks
 
 ### What They Are
 
@@ -137,7 +174,7 @@ Claude: Runs through the framework, scores each criterion, outputs a verdict.
 
 If you've made the same type of decision 3+ times, formalize it.
 
-## Component 5: Knowledge — Technical Memory
+## Component 6: Knowledge — Technical Memory
 
 ### What It Is
 
@@ -151,26 +188,84 @@ Markdown files that capture hard-won technical lessons. Things you learned the h
 
 Each knowledge file covers one topic:
 - Context (why this knowledge exists)
-- The pattern (what works)
+- The pattern (what works, with code examples)
 - What doesn't work (common mistakes)
 - Gotchas (non-obvious things)
+
+### Real Examples
+
+This repo includes two real knowledge files:
+
+- **`edge-runtime-patterns.md`** — Constraints and workarounds for Cloudflare Workers/Vercel Edge (no `fs`, no `setTimeout`, use KV not memory, Web Crypto not Node crypto)
+- **`payment-integration.md`** — Webhook-first architecture, idempotent handlers, signature verification, test vs production credential management
 
 ### How It Connects
 
 CLAUDE.md references knowledge files:
 ```markdown
 **Knowledge** in `.claude/knowledge/`:
-- `edge-patterns.md` — Edge Runtime constraints
-- `payment-integration.md` — Stripe/ECPay setup
+- `edge-runtime-patterns.md` — Edge Runtime constraints
+- `payment-integration.md` — Payment provider setup
 ```
 
 When working on payments, Claude reads the knowledge file first. This prevents re-discovering the same gotchas.
 
-## Component 6: Automations — Daily Workflow
+## Component 7: PM Handbook — The Full Playbook
+
+### What It Is
+
+A 10-chapter playbook covering the complete project lifecycle — from inception to production safety.
+
+### The Chapters
+
+| Chapter | What It Covers |
+|---------|---------------|
+| 1-3 | Foundation, status checks, priority framework |
+| 4 | New project inception (challenge the problem first) |
+| 5 | Session handover protocol |
+| 6-7 | Security basics, skills & knowledge system |
+| 8 | Dashboard update protocol (when and how to update) |
+| 9 | **Security audit** — full checklist across 6 categories (auth, input validation, API security, secrets, data privacy, infrastructure) |
+| 10 | **Production safety** — 6-layer defense framework (validation, error handling, monitoring, rate limiting, rollback, backup) |
+
+### Why Chapters 9 and 10 Matter
+
+Chapter 9 (Security Audit) gives you a concrete checklist to run before any project goes live. It catches the common mistakes: exposed secrets, missing rate limiting, CORS misconfiguration, and unverified webhooks.
+
+Chapter 10 (Production Safety) is the "what could go wrong" framework. Six layers of defense so that when (not if) something breaks, the blast radius is contained and recovery is fast.
+
+## Component 8: Automations — Daily Workflow
 
 ### What They Are
 
-Shell aliases that invoke Claude Code with specific prompts. One command to get your morning briefing, evaluate an idea, or write a handover.
+Shell aliases that invoke Claude Code with specific prompts. One command to get your morning briefing, evaluate an idea, or run a security audit.
+
+### Setup
+
+```bash
+# 1. Copy the template
+cp scripts/automations-template.sh ~/.claude-automations.sh
+
+# 2. Edit PROJECT_ROOT in the file
+
+# 3. Add to your shell config
+echo 'source ~/.claude-automations.sh' >> ~/.zshrc
+
+# 4. Reload
+source ~/.zshrc
+```
+
+### Available Commands
+
+| Command | What It Does |
+|---------|-------------|
+| `morning` | Top 3 priorities, blockers, quick wins |
+| `status` | Current state of all projects |
+| `evaluate "idea"` | Run should-i-build-this framework |
+| `weekly` | Week in review across all projects |
+| `handover` | Write session handover |
+| `learn "topic"` | Capture a new knowledge file |
+| `audit "project"` | Run security checklist |
 
 ### Why Shell Aliases
 
@@ -183,18 +278,20 @@ Shell aliases that invoke Claude Code with specific prompts. One command to get 
 Each component is useful alone. Together, they create a flywheel:
 
 1. **CLAUDE.md** gives Claude context -> better code from session 1
-2. **HANDOVER.md** preserves progress -> no repeated work
-3. **Learned Rules** prevent mistakes -> fewer bugs over time
-4. **Skills** make decisions faster -> more time building
-5. **Knowledge** prevents re-learning -> compounding expertise
-6. **DASHBOARD.md** clarifies priorities -> less wasted effort
-7. **Automations** reduce friction -> system gets used daily
+2. **soul.md** matches Claude's communication to your style -> less friction
+3. **HANDOVER.md** preserves progress -> no repeated work
+4. **Learned Rules** prevent mistakes -> fewer bugs over time
+5. **Skills** make decisions faster -> more time building
+6. **Knowledge** prevents re-learning -> compounding expertise
+7. **DASHBOARD.md** clarifies priorities -> less wasted effort
+8. **PM Handbook** systematizes operations -> consistent quality
+9. **Automations** reduce friction -> system gets used daily
 
 After 2 months, the system has:
 - 15+ learned rules
 - 4+ knowledge files
 - 4 decision frameworks
-- A PM handbook
+- A 10-chapter PM handbook
 - Daily automations
 
 Every session is faster than the last. Context compounds. Mistakes don't repeat. That's the system.

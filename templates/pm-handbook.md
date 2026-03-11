@@ -123,7 +123,7 @@ Read `HANDOVER.md` first, delete it, then continue from "Next step".
 
 ---
 
-## Chapter 6: Security Audit Protocol
+## Chapter 6: Pre-Launch Security Basics
 
 Run before any project goes live.
 
@@ -181,3 +181,162 @@ Located in `.claude/knowledge/`. Captures hard-won lessons.
 1. After completing a project phase: extract learnings to `knowledge/`
 2. After a strategic decision: consider if it's a repeatable pattern for `skills/`
 3. Monthly: review for outdated information
+
+---
+
+## Chapter 8: Dashboard Update Protocol
+
+### When to Update
+
+- After completing a significant task or milestone
+- When priorities shift (new blocker, new opportunity)
+- At minimum during weekly review
+- When a project status changes (active -> shipped, active -> on hold)
+
+### Update Checklist
+
+1. Update progress percentages
+2. Update "Current Focus" column
+3. Move completed projects to "Shipped / Maintenance"
+4. Update "Priority Stack" if priorities changed
+5. Add to "Recent Wins" if something shipped
+6. Remove resolved blockers
+7. Commit: `chore: update project dashboard`
+
+### Staleness Rule
+
+If DASHBOARD.md hasn't been updated in 7+ days, treat it as potentially unreliable. Run a fresh status check (Chapter 2) before making decisions based on it.
+
+---
+
+## Chapter 9: Security Audit Protocol
+
+Run before any project goes live. Trigger with: "run security audit on [project]"
+
+### The Checklist
+
+#### 1. Authentication & Authorization
+- [ ] Auth uses a trusted provider (Clerk, Supabase Auth, etc.) — not DIY
+- [ ] JWT tokens are httpOnly, secure, sameSite
+- [ ] Session expiry is configured (not infinite)
+- [ ] Admin routes are protected server-side (not just hidden in UI)
+- [ ] Password reset flow works correctly
+
+#### 2. Input Validation
+- [ ] All user input validated server-side (Zod, Pydantic, etc.)
+- [ ] File uploads restricted by type and size
+- [ ] SQL/NoSQL injection prevented (parameterized queries or ORM)
+- [ ] XSS prevented (no dangerouslySetInnerHTML without sanitization)
+
+#### 3. API Security
+- [ ] Rate limiting on all public endpoints
+- [ ] CORS configured for specific origins (not `*` in production)
+- [ ] API keys not exposed in client-side code
+- [ ] Webhook endpoints verify signatures before processing
+
+#### 4. Environment & Secrets
+- [ ] `.env` files in `.gitignore`
+- [ ] No secrets in git history (check with `git log -p | grep -i "api_key\|secret\|password"`)
+- [ ] Production and test credentials separated
+- [ ] All secrets rotatable without code changes
+
+#### 5. Data & Privacy
+- [ ] User data encrypted at rest (if sensitive)
+- [ ] Privacy policy exists and is accurate
+- [ ] No PII logged in plain text
+- [ ] Data deletion flow exists (GDPR/user request)
+
+#### 6. Infrastructure
+- [ ] HTTPS enforced (no HTTP fallback)
+- [ ] Security headers set (X-Frame-Options, CSP, etc.)
+- [ ] Dependencies up to date (no known CVEs)
+- [ ] Error messages don't leak internal details to users
+
+### Output Format
+
+```
+## Security Audit: [Project Name]
+**Date:** YYYY-MM-DD
+**Auditor:** [Claude / your name]
+
+### Results: X/6 categories passed
+
+| Category | Status | Issues |
+|----------|--------|--------|
+| Auth | PASS/FAIL | [details] |
+| Input Validation | PASS/FAIL | [details] |
+| API Security | PASS/FAIL | [details] |
+| Env & Secrets | PASS/FAIL | [details] |
+| Data & Privacy | PASS/FAIL | [details] |
+| Infrastructure | PASS/FAIL | [details] |
+
+### Action Items (prioritized)
+1. [Critical] ...
+2. [High] ...
+3. [Medium] ...
+```
+
+---
+
+## Chapter 10: Production Safety Framework
+
+The 6-layer defense framework for deployed applications.
+
+### Layer 1: Validation
+
+Catch problems before they reach your system.
+
+- Input validation at API boundaries (Zod, Pydantic)
+- Type checking at build time (TypeScript strict, mypy)
+- Schema validation for database writes
+- **Rule:** Validate at the edge, trust internally.
+
+### Layer 2: Error Handling
+
+When something goes wrong, fail gracefully.
+
+- Custom error classes for domain errors
+- User-friendly messages (separate from technical errors)
+- Error boundaries in React (catch rendering failures)
+- Never silent failures — log, alert, or surface every error
+- **Rule:** The user should never see a stack trace.
+
+### Layer 3: Monitoring
+
+Know when something breaks before users tell you.
+
+- Error tracking (Sentry, LogRocket)
+- Uptime monitoring (UptimeRobot, Better Uptime)
+- Performance monitoring (Lighthouse CI, Web Vitals)
+- Log aggregation for debugging production issues
+- **Rule:** If it's not monitored, assume it's broken.
+
+### Layer 4: Rate Limiting & Abuse Prevention
+
+Protect your system from abuse and runaway costs.
+
+- Rate limiting on all public endpoints
+- Cost caps on AI API calls (set billing alerts)
+- Request size limits
+- Bot detection for sensitive endpoints
+- **Rule:** Your API will be abused. Plan for it.
+
+### Layer 5: Rollback
+
+When things go wrong, go back to what worked.
+
+- Deployment rollback in < 5 minutes
+- Database migration rollback plan for every migration
+- Feature flags for risky features (ship off, turn on gradually)
+- Git tags on every production deploy
+- **Rule:** If you can't roll back in 5 minutes, you're not ready to deploy.
+
+### Layer 6: Backup & Recovery
+
+The last line of defense.
+
+- Database backups (automated, tested)
+- File storage backups (R2/S3 versioning)
+- Recovery runbook: step-by-step guide to restore from backup
+- Test recovery annually (untested backups are not backups)
+- **Rule:** Backups you haven't tested are just hopes.

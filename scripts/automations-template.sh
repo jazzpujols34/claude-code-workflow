@@ -1,10 +1,21 @@
 #!/bin/bash
 # Claude Code Workflow — Shell Automations
 #
-# Add these aliases to your ~/.zshrc or ~/.bashrc
-# Then run: source ~/.zshrc
+# ── INSTALLATION ──────────────────────────────────────────────────
 #
-# Customize PROJECT_ROOT to point to your project directory.
+# 1. Copy this file somewhere permanent:
+#      cp scripts/automations-template.sh ~/.claude-automations.sh
+#
+# 2. Edit PROJECT_ROOT below to point to your project directory.
+#
+# 3. Add this line to your ~/.zshrc (or ~/.bashrc):
+#      source ~/.claude-automations.sh
+#
+# 4. Reload your shell:
+#      source ~/.zshrc
+#
+# That's it. Now you have: morning, status, evaluate, weekly, handover, learn
+# ──────────────────────────────────────────────────────────────────
 
 PROJECT_ROOT="$HOME/projects/your-project"
 
@@ -34,3 +45,8 @@ alias handover="claude -p 'Write HANDOVER.md summarizing: 1) What was done 2) Wh
 # After learning something reusable
 # Usage: learn "Cloudflare Workers can't use Node.js crypto"
 alias learn="cd $PROJECT_ROOT && claude -p 'Add a new knowledge file to .claude/knowledge/ documenting what we learned about:'"
+
+# ─── Security Audit ──────────────────────────────────────────────
+# Run the security audit checklist on a project
+# Usage: audit "my-project"
+alias audit="cd $PROJECT_ROOT && claude -p 'Read .claude/pm-handbook.md Chapter 9. Run a security audit on:'"
