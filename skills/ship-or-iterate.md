@@ -1,3 +1,8 @@
+---
+name: ship-or-iterate
+description: Use when a project feels "almost done" and you need to decide whether to release, keep building, or kill it. Trigger on "should I ship", "is this ready", "should I keep working on this".
+---
+
 # Skill: Ship or Iterate?
 
 > Decide whether to ship current version or keep polishing.
@@ -56,3 +61,9 @@ IF SHIP: [where to post / who to tell]
 IF ITERATE: [specific task, max 3 days]
 IF PIVOT: [kill or archive?]
 ```
+
+## Gotchas
+
+- **"Ship" doesn't mean "announce."** Shipping can mean deploying quietly and sending to 3 test users. Don't conflate shipping with a Product Hunt launch.
+- **Payment flow is a hard gate.** If the product is monetized and payment doesn't work, that's always ITERATE — no exceptions.
+- **The "almost done" trap.** If you've said "almost done" for more than 5 days, you're iterating on polish, not value. Ship.

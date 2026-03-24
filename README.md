@@ -276,6 +276,33 @@ A: Write a HANDOVER.md immediately. Include what you were doing, current state, 
 **Q: How do I know the system is working?**
 A: You'll notice: sessions start faster (no re-explaining), mistakes don't repeat (learned rules), decisions are consistent (skills), and context survives across sessions (handovers).
 
+## Free vs Pro
+
+This repo is the **free starter kit** — enough to transform how you use Claude Code. The **Pro version** adds 13 more skills with executable scripts, safety modes, and creative tools.
+
+| Feature | Free (this repo) | Pro ($29) |
+|---------|:-:|:-:|
+| CLAUDE.md template | Yes | Yes |
+| soul.md + PM handbook | Yes | Yes |
+| HANDOVER / DASHBOARD | Yes | Yes |
+| Decision framework skills | 4 | 4 |
+| Deploy checklist (CF/CR/Vercel) | — | With scripts |
+| Security scanner | — | With scripts |
+| Debug loop breaker | — | Yes |
+| Cloud Run debug runbook | — | Yes |
+| Session relay system | — | Yes |
+| Safety modes (/careful, /freeze) | — | Yes |
+| HTML slide generator (12 presets) | — | Yes |
+| SVG diagram skill | — | Yes |
+| X thread compiler | — | Yes |
+| Writing autopsy | — | Yes |
+| Anti-AI writing guide (EN + 中文) | — | Yes |
+| Vibe coding stack reference | — | Yes |
+| **Total skills** | **4** | **17** |
+| **Total files** | **19** | **40+** |
+
+**[Get the Pro version on Gumroad →](https://aipujols.gumroad.com/l/zeglpf)**
+
 ## Read the full write-up
 
 - [Part 1: 3 files that make Claude Code remember your project](https://x.com/Jazzpujols34/status/2031582021152367081) (SPEC.md, CLAUDE.md, HANDOVER.md)

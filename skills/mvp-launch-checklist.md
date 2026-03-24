@@ -1,3 +1,8 @@
+---
+name: mvp-launch-checklist
+description: Use before launching any product or feature to production. Checks infrastructure, performance, UX, and code quality. Trigger on "launch checklist", "ready to launch", "pre-launch".
+---
+
 # Skill: MVP Launch Checklist
 
 > Run through this before launching any product.
@@ -48,3 +53,10 @@ If you've checked the Must Have items, SHIP. The rest can be iterated.
 - [ ] Get feedback from 3 real users
 - [ ] Fix critical bugs immediately
 - [ ] Ignore feature requests (for now)
+
+## Gotchas
+
+- **Lighthouse on localhost lies.** Always test the deployed URL, not `localhost`. Cloudflare/Vercel add middleware that changes perf characteristics.
+- **"Tested on phone" means your actual phone.** Chrome DevTools responsive mode doesn't simulate real touch, real keyboard popups, or real network conditions.
+- **OG images break silently.** Test with Twitter Card Validator and Facebook Debugger — don't assume the meta tags work because they look right in the HTML.
+- **First user test: don't coach them.** Hand them the URL and watch. If you have to explain how to start, the onboarding is broken.

@@ -1,3 +1,8 @@
+---
+name: should-i-build-this
+description: Use when evaluating a new project idea, side project, or feature to decide whether to build, prototype, or pass. Trigger on "should I build", "evaluate this idea", "is this worth building".
+---
+
 # Skill: Should I Build This?
 
 > Decision framework for evaluating new project ideas.
@@ -41,3 +46,9 @@ VERDICT: [BUILD / PROTOTYPE / PASS]
 REASON: [1 sentence]
 NEXT ACTION: [specific step]
 ```
+
+## Gotchas
+
+- **Distribution is the hardest column.** Having 1000 Twitter followers doesn't mean you can reach 10 paying customers this week. If the answer is "I'll post on social media," that's a No.
+- **Time to MVP creep.** "2 weeks" becomes 2 months when auth, payments, and deploy are involved. Only count if using existing infra (Clerk, Stripe, etc.).
+- **Sunk cost trap.** If you already spent a week prototyping, this framework still applies. Don't let past effort override a PASS verdict.

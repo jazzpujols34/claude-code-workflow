@@ -1,3 +1,8 @@
+---
+name: revenue-potential
+description: Use when prioritizing which project to work on next based on revenue readiness and path to cash flow. Trigger on "which project should I focus on", "revenue priority", "what makes money".
+---
+
 # Skill: Revenue Potential Assessment
 
 > Evaluate which projects have the best path to cash flow.
@@ -48,3 +53,9 @@ TIER: [1/2/3]
 BLOCKER: [what's stopping revenue]
 NEXT ACTION: [unblock the blocker]
 ```
+
+## Gotchas
+
+- **"Payment Ready" is binary, not gradual.** Either someone can pay you today or they can't. "Stripe is set up but no checkout flow" = No.
+- **Customer Access ≠ audience.** Having 1000 Twitter followers doesn't mean you can reach 10 paying customers this week. The question is: can you DM or email 10 specific people who would buy?
+- **Repeat revenue is overweighted in fantasy.** Subscription sounds great but many products are one-shot purchases. Score honestly.
