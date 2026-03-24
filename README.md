@@ -301,7 +301,7 @@ This repo is the **free starter kit** — enough to transform how you use Claude
 | **Total skills** | **4** | **17** |
 | **Total files** | **19** | **40+** |
 
-**[Get the Pro version on Gumroad →](https://aipujols.gumroad.com/l/claude-work-workflow)**
+**[Get the Pro version on Gumroad →](https://jazzpujols34.gumroad.com/l/claude-work-workflow)**
 
 ## Read the full write-up
 
