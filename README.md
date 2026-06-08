@@ -323,8 +323,7 @@ This repo is the **free starter kit** — enough to transform how you use Claude
 | CLAUDE.md template | Yes | Yes |
 | soul.md + PM handbook | Yes | Yes |
 | HANDOVER / DASHBOARD | Yes | Yes |
-| Hooks template (settings.json) | Yes | Yes |
-| Memory index template | Yes | Yes |
+| Hooks + Memory templates | Yes | (free addition) |
 | Decision framework skills | 4 | 4 |
 | Deploy checklist (CF/CR/Vercel) | — | With scripts |
 | Security scanner | — | With scripts |
