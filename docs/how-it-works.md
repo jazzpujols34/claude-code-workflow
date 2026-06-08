@@ -67,11 +67,13 @@ An ephemeral file that captures the state of work at the end of one session, so 
 
 ```
 Session A: work → write HANDOVER.md → end
-Session B: read HANDOVER.md → delete it → work → write new HANDOVER.md → end
-Session C: read HANDOVER.md → delete it → work → ...
+Session B: read HANDOVER.md → overwrite with new state → work → end
+Session C: read HANDOVER.md → overwrite → work → ...
 ```
 
-Key rule: **delete after reading**. A stale HANDOVER.md from 3 sessions ago is worse than no HANDOVER.md at all.
+Key rule: **never act on a stale baton**. A HANDOVER.md from 3 sessions ago is worse than none — so the *next* session overwrites it (or archives it to `HANDOVER.archive/`). "Overwrite," not "`rm` the only copy": if you commit handovers, git already keeps the history.
+
+> **2026 note:** Claude Code now has native, file-based **Memory** that survives across sessions, and it auto-compacts long conversations instead of hard-resetting. That doesn't make HANDOVER.md obsolete — it changes its job. Memory holds *durable* project facts; HANDOVER.md is the *human-curated baton* for one session: the exact next step, what's uncommitted, what to watch. Use both. See the README's "Where this meets native Claude Code" section.
 
 ### What Goes In It
 
@@ -157,11 +159,15 @@ Structured markdown files that encode repeatable decision processes. Instead of 
 
 ### How They Work
 
-```
-You: "Read .claude/skills/should-i-build-this.md and evaluate: 'A reading tracker app'"
+Each skill file has `name` + `description` frontmatter. Claude Code reads that frontmatter and **auto-triggers** the skill when your request matches — you state intent, the right framework fires:
 
-Claude: Runs through the framework, scores each criterion, outputs a verdict.
 ```
+You: "Is a reading-tracker app worth building?"
+
+Claude: (auto-fires should-i-build-this) → scores each criterion, outputs a verdict.
+```
+
+The explicit `Read .claude/skills/X.md and evaluate ...` form still works as a manual override when you want to force a specific skill. A skill can be one `.md` file or a folder with a `SKILL.md` entry point (for skills that ship scripts/assets).
 
 ### Why Encode Decisions
 
@@ -194,10 +200,11 @@ Each knowledge file covers one topic:
 
 ### Real Examples
 
-This repo includes two real knowledge files:
+This repo ships three knowledge files:
 
-- **`edge-runtime-patterns.md`** — Constraints and workarounds for Cloudflare Workers/Vercel Edge (no `fs`, no `setTimeout`, use KV not memory, Web Crypto not Node crypto)
+- **`edge-runtime-patterns.md`** — Choosing a Cloudflare runtime (OpenNext/Node vs edge) and the constraints that apply to each
 - **`payment-integration.md`** — Webhook-first architecture, idempotent handlers, signature verification, test vs production credential management
+- **`example-learning.md`** — The blank template for capturing your own learnings
 
 ### How It Connects
 
@@ -223,7 +230,8 @@ A 10-chapter playbook covering the complete project lifecycle — from inception
 | 1-3 | Foundation, status checks, priority framework |
 | 4 | New project inception (challenge the problem first) |
 | 5 | Session handover protocol |
-| 6-7 | Security basics, skills & knowledge system |
+| 6 | Pointer to the single security checklist (Chapter 9) |
+| 7 | Skills & knowledge system |
 | 8 | Dashboard update protocol (when and how to update) |
 | 9 | **Security audit** — full checklist across 6 categories (auth, input validation, API security, secrets, data privacy, infrastructure) |
 | 10 | **Production safety** — 6-layer defense framework (validation, error handling, monitoring, rate limiting, rollback, backup) |
@@ -287,11 +295,25 @@ Each component is useful alone. Together, they create a flywheel:
 8. **PM Handbook** systematizes operations -> consistent quality
 9. **Automations** reduce friction -> system gets used daily
 
-After 2 months, the system has:
+After a couple of months of real use, a system like this accumulates:
 - 15+ learned rules
-- 4+ knowledge files
+- A handful of knowledge files
 - 4 decision frameworks
 - A 10-chapter PM handbook
 - Daily automations
 
 Every session is faster than the last. Context compounds. Mistakes don't repeat. That's the system.
+
+## Where this meets native Claude Code (2026)
+
+This kit predates several Claude Code primitives that now ship in the box. It still earns its place — but as *conventions layered on top of* the harness, not a replacement for it. Use the native feature where it exists; keep the convention for the judgment it encodes.
+
+| This kit's convention | Native primitive (2026) | How they fit together |
+|---|---|---|
+| Skills as `.md` you `Read` manually | **Skills auto-trigger** from `description` frontmatter | The files here already have the frontmatter — let them fire on intent; `Read X.md` is a manual override. |
+| `HANDOVER.md` relay | File-based **Memory** + auto-compaction | Memory = durable project facts. HANDOVER = the per-session human baton (exact next step, uncommitted state). |
+| Shell aliases (`morning`, `audit`) | **Hooks** (`settings.json` lifecycle events) | Aliases are still handy at the terminal. Hooks enforce behavior *inside* the session — see `templates/settings.json`. |
+| "Every correction = a Learned Rule" (prose) | A **Stop / PostToolUse hook** can remind you | Keep the rule; let a hook nudge you to actually capture it. |
+| Manual multi-project status sweep | **Subagents** (parallel Task fan-out) | One agent per project, in parallel, then synthesized — faster than serial. |
+
+If you've used Claude Code in 2026, reach for the native primitive first and let these conventions carry the parts the harness doesn't: *what* to decide, *what* to write down, *what* good looks like.

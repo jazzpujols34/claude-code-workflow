@@ -51,7 +51,7 @@ The cycle: read → delete → work → write → hand off.
 - `mvp-launch-checklist.md` — Pre-launch checklist
 
 **Knowledge** in `.claude/knowledge/`:
-- `cloudflare-edge-patterns.md` — Edge Runtime constraints
+- `edge-runtime-patterns.md` — Edge Runtime constraints
 - `payment-integration.md` — ECPay/Stripe integration
 - `mobile-app-launch.md` — iOS submission
 

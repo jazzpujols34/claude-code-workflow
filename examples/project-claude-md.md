@@ -13,7 +13,7 @@
 AI-powered video generation platform. Users upload photos + text, AI generates
 memorial videos. Deployed on Cloudflare Pages with Edge Runtime.
 
-**Stack:** Next.js 16, TypeScript, Tailwind, Cloudflare Pages/R2/KV
+**Stack:** Next.js (App Router), TypeScript, Tailwind, Cloudflare Workers/R2/KV (OpenNext)
 **Payments:** Stripe (international) + ECPay (Taiwan)
 **Status:** Production (live with paying users)
 
@@ -42,7 +42,7 @@ This runs on Cloudflare Workers. Critical limitations:
 - Request timeout: 30s (use queues for long tasks)
 - Bundle size limit: 1MB after minification
 
-Read `.claude/knowledge/cloudflare-edge-patterns.md` for full patterns.
+Read `.claude/knowledge/edge-runtime-patterns.md` for full patterns.
 
 ## Key Commands
 

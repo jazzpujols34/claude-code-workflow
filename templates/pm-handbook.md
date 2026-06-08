@@ -119,34 +119,17 @@ When context window is nearly full, write a handover file.
 
 ### New Session Start
 
-Read `HANDOVER.md` first, delete it, then continue from "Next step".
+Read `HANDOVER.md` first, then continue from "Next step". When the session ends, **overwrite** it with the new state (or move it to `HANDOVER.archive/`) — don't just `rm` the only written record of where you were. The goal is "no stale baton," not "destroy the trail." If you commit handovers to git, overwriting already preserves history.
+
+> Note for 2026: Claude Code now ships native, file-based **Memory** that persists across sessions. Treat HANDOVER.md as the *human-readable, per-session baton* (exact next step, uncommitted state, what to watch) and Memory as the *durable* layer (long-lived project facts). They're complementary — see the README's "Where this meets native Claude Code" section.
 
 ---
 
-## Chapter 6: Pre-Launch Security Basics
+## Chapter 6: Security — see Chapter 9
 
-Run before any project goes live.
+Security has one home in this handbook: **Chapter 9 (Security Audit Protocol)**, a concrete 6-category checklist you run before launch. This chapter used to hold a separate, overlapping list with a different category count — that was a maintenance trap (two checklists drifting apart for the same task), so it now points to the single source of truth.
 
-### Checklist Categories
-
-1. Rate Limiting
-2. Authentication & Authorization
-3. Input Validation
-4. API Security
-5. Environment & Secrets
-6. Dependencies
-7. HTTPS & Headers
-8. Error Handling
-9. Data & Privacy
-
-### Output
-
-```
-## Audit Result: [Project]
-- Passed: X/9 categories
-- Issues Found: [list]
-- Action Items: [prioritized fixes]
-```
+Run it with: `Read .claude/pm-handbook.md Chapter 9. Run a security audit on [project]`.
 
 ---
 
@@ -163,12 +146,17 @@ Located in `.claude/skills/`. Each skill is a structured decision process.
 | `ship-or-iterate.md` | Deciding release vs. continue |
 | `mvp-launch-checklist.md` | Before launching any product |
 
-**Usage:**
+**How skills fire (2026):** Each skill file carries `name` + `description` frontmatter. Claude Code reads that frontmatter and **auto-triggers** the skill when your request matches it — you usually don't need to name the file. Just state intent:
+```
+"Should I build a reading-tracker app?"   → auto-fires should-i-build-this
+```
+The explicit form is a manual override when you want to force a specific skill:
 ```
 Read .claude/skills/should-i-build-this.md and evaluate: [idea description]
 ```
+Skills can be a single `.md` file (as here) or a folder with a `SKILL.md` entry point when they need scripts or assets.
 
-**Adding new skills:** After making a repeatable decision type 3+ times, formalize it.
+**Adding new skills:** After making a repeatable decision type 3+ times, formalize it — and write a sharp `description` with the trigger phrases, because that's what makes it auto-fire.
 
 ### Knowledge (Technical Learnings)
 
@@ -236,7 +224,10 @@ Run before any project goes live. Trigger with: "run security audit on [project]
 
 #### 4. Environment & Secrets
 - [ ] `.env` files in `.gitignore`
-- [ ] No secrets in git history (check with `git log -p | grep -i "api_key\|secret\|password"`)
+- [ ] No secrets in git history — scan with a real tool, not grep:
+      `gitleaks detect --source . -v` (or `trufflehog git file://. --only-verified`).
+      A `git log -p | grep` pass is slow on real repos and misses the common shapes
+      (`sk-...`, `AKIA...`, JWTs, base64 blobs, `.env` diffs) — it gives false confidence.
 - [ ] Production and test credentials separated
 - [ ] All secrets rotatable without code changes
 

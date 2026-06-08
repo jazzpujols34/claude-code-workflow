@@ -1,6 +1,8 @@
 # Claude Code Workflow
 
-A complete AI-assisted development system for Claude Code. Not just a CLAUDE.md template — a full operating system for shipping products at 10x speed.
+A complete AI-assisted development system for Claude Code. Not just a CLAUDE.md template — a set of conventions, templates, and decision frameworks layered on top of Claude Code's native features (Skills, Hooks, Memory) so you ship faster and your context compounds across sessions.
+
+> **Last verified against Claude Code: June 2026** — covers auto-triggering Skills, Hooks, and file-based Memory. See [CHANGELOG.md](CHANGELOG.md) for what changed.
 
 ## The Problem
 
@@ -16,16 +18,19 @@ your-project/
 ├── HANDOVER.md            # Session relay — ephemeral baton between sessions
 ├── DASHBOARD.md           # Cross-project status — priorities, blockers, wins
 └── .claude/
+    ├── settings.json     # Hooks — inject HANDOVER on start, guard destructive cmds, end-of-session nudge
+    ├── MEMORY.md         # Index for native file-based Memory (durable facts)
     ├── pm-handbook.md     # PM playbook — status checks, priorities, security, production safety
     ├── soul.md            # Personality layer — communication style, values
-    ├── skills/            # Decision frameworks — reusable strategic thinking
+    ├── skills/            # Decision frameworks — auto-trigger from their description frontmatter
     │   ├── should-i-build-this.md
     │   ├── ship-or-iterate.md
     │   ├── revenue-potential.md
     │   └── mvp-launch-checklist.md
-    ├── knowledge/         # Technical learnings — hard-won lessons
-    │   └── [topic].md
-    └── automations.md     # Shell aliases — morning briefing, status checks
+    └── knowledge/         # Technical learnings — hard-won lessons
+        └── [topic].md
+
+# (shell aliases install separately from scripts/automations-template.sh → ~/.claude-automations.sh)
 ```
 
 ### What Each Piece Does
@@ -33,17 +38,19 @@ your-project/
 | File | Purpose | When It's Read |
 |------|---------|----------------|
 | `CLAUDE.md` | Project context, coding standards, learned rules | Every session (auto-loaded) |
-| `HANDOVER.md` | What happened last session, exact next steps | Start of new session, then deleted |
+| `HANDOVER.md` | What happened last session, exact next steps | Start of new session, then overwritten |
 | `DASHBOARD.md` | All projects at a glance, priority stack | When planning what to work on |
+| `settings.json` | Hooks: inject HANDOVER on start, guard destructive commands, end-of-session nudge | Every session (by the harness) |
+| `MEMORY.md` | Index for native file-based Memory — durable, cross-session facts | Auto-recalled by Claude Code |
 | `pm-handbook.md` | How to check status, set priorities, start projects, run security audits | When doing PM work |
 | `soul.md` | Communication preferences, values, what to avoid | Every session (referenced by CLAUDE.md) |
-| `skills/*.md` | Structured decision frameworks | Before strategic decisions |
+| `skills/*.md` | Structured decision frameworks | Auto-fire on matching intent |
 | `knowledge/*.md` | Technical patterns and gotchas | When working on related features |
-| `automations.md` | Shell aliases for common workflows | Setup once, use daily |
+| `automations-template.sh` | Shell aliases for common workflows | Setup once, use daily |
 
 ## The Result
 
-This system was used to build **12+ projects in ~2 months**, with 3+ deployed to production with live payments. Including:
+This system was used to build **12+ projects in ~2 months** (and has kept compounding since), with several deployed to production with live payments. Including:
 
 - An AI memorial video platform (Next.js, Cloudflare Pages, ECPay)
 - A podcast transcription pipeline (Python, 100+ episodes processed)
@@ -87,12 +94,18 @@ cp templates/DASHBOARD.md ./DASHBOARD.md
 cp templates/pm-handbook.md ./.claude/pm-handbook.md
 cp templates/soul.md ./.claude/soul.md
 
-# Decision frameworks
+# Native-feature glue: Hooks + Memory index
+cp templates/settings.json ./.claude/settings.json
+cp templates/MEMORY.md ./.claude/MEMORY.md
+
+# Decision frameworks (auto-trigger once they're in .claude/skills/)
 cp skills/*.md ./.claude/skills/
 
 # Automations (see install instructions inside the file)
 cp scripts/automations-template.sh ~/.claude-automations.sh
 ```
+
+> The Hooks in `settings.json` use `jq` — install it (`brew install jq`) or trim the PreToolUse guard if you don't want it.
 
 Edit each file — templates have `[PLACEHOLDER]` markers for everything you need to customize.
 
@@ -112,13 +125,13 @@ See [docs/how-it-works.md](docs/how-it-works.md) for the full breakdown.
 
 ### 2. HANDOVER.md — The Session Relay
 
-Context windows have limits. When one session ends, write a `HANDOVER.md`. The next session reads it, deletes it, and continues seamlessly.
+When one session ends, write a `HANDOVER.md`: the exact next step, what's uncommitted, what to watch. The next session reads it and **overwrites** it (never `rm` the only copy — if you commit handovers, git keeps the trail).
 
-**The cycle:** read -> delete -> work -> write -> hand off.
+**The cycle:** read -> work -> overwrite -> hand off.
 
-This turns Claude Code from a "single session tool" into a **persistent development partner**.
+Pairs with native **Memory**: Memory holds durable project facts; HANDOVER.md is the per-session human baton. With the Hooks template, the `SessionStart` hook injects HANDOVER.md automatically so the next session opens already knowing where it left off.
 
-See [examples/real-handover.md](examples/real-handover.md) for a real-world example.
+See [examples/real-handover.md](examples/real-handover.md) for a real handover and [examples/session-walkthrough.md](examples/session-walkthrough.md) for the full cycle in action.
 
 ### 3. soul.md — The Personality Layer
 
@@ -126,13 +139,19 @@ Defines how Claude communicates with you — direct vs. detailed, when to push b
 
 ### 4. Skills — Reusable Decision Frameworks
 
-Instead of re-thinking "should I build this?" every time, encode your decision process once:
+Encode a decision process once; let it fire automatically. Each skill carries `name` + `description` frontmatter, and Claude Code **auto-triggers** it when your request matches — you just state intent:
+
+```
+"Is a reading-tracker app worth building?"   → auto-fires should-i-build-this
+```
+
+The explicit form is a manual override when you want to force a specific skill:
 
 ```
 Read .claude/skills/should-i-build-this.md and evaluate: "An app that tracks reading habits"
 ```
 
-Claude runs your framework and gives you a structured verdict. Same quality decision every time, zero cognitive load.
+Same quality decision every time, zero cognitive load. (A skill can be one `.md` file or a folder with a `SKILL.md` entry point for skills that ship scripts.)
 
 ### 5. Knowledge — Technical Memory
 
@@ -155,7 +174,7 @@ You learn something once. Claude remembers it forever. See `knowledge/` for real
 | 3 | Priority Framework |
 | 4 | New Project Inception |
 | 5 | Session Handover Protocol |
-| 6 | Security Audit (pre-launch checklist) |
+| 6 | Pointer to the single security checklist (Ch. 9) |
 | 7 | Skills & Knowledge System |
 | 8 | Dashboard Update Protocol |
 | 9 | Security Audit Protocol (detailed checklist) |
@@ -176,6 +195,20 @@ learn "Edge Workers can't use Node.js crypto"
 
 See [scripts/automations-template.sh](scripts/automations-template.sh) for installation instructions.
 
+## Where this meets native Claude Code (2026)
+
+This kit started as pure markdown conventions. Several of those conventions now have a native counterpart in Claude Code — so use the native primitive first and let the convention carry the judgment it encodes (*what* to decide, *what* to write down, *what* good looks like).
+
+| This kit's convention | Native primitive | How they fit |
+|---|---|---|
+| Skills you `Read` by hand | **Skills auto-trigger** from `description` frontmatter | The skill files already have the frontmatter — they fire on intent; `Read X.md` is a manual override. |
+| `HANDOVER.md` relay | File-based **Memory** + auto-compaction | Memory = durable project facts. HANDOVER = the per-session human baton. |
+| Shell aliases | **Hooks** (`settings.json`) | Aliases live at the terminal; Hooks enforce behavior inside the session (`templates/settings.json`). |
+| "Every correction = a rule" (prose) | A **Stop hook** nudges you | Keep the rule; let a hook remind you to actually capture it. |
+| Manual multi-project status sweep | **Subagents** (parallel fan-out) | One agent per project, in parallel, then synthesized. |
+
+Honest take: if you've used Claude Code in 2026, this kit isn't a replacement for the harness — it's the layer of conventions, judgment, and templates that the harness doesn't ship. That's where its value is.
+
 ## File Reference
 
 ```
@@ -183,10 +216,12 @@ templates/
 ├── CLAUDE.md              # Starter CLAUDE.md with all sections
 ├── HANDOVER.md            # Session handover template
 ├── DASHBOARD.md           # Multi-project dashboard template
+├── settings.json          # Hooks: SessionStart/PreToolUse/Stop
+├── MEMORY.md              # Native Memory index + how-to
 ├── pm-handbook.md         # PM playbook (10 chapters)
 └── soul.md                # Communication style & values template
 
-skills/
+skills/                    # Each auto-triggers from its description frontmatter
 ├── should-i-build-this.md # Evaluate new project ideas
 ├── ship-or-iterate.md     # Ship vs. keep building
 ├── revenue-potential.md   # Prioritize by cash flow
@@ -194,7 +229,7 @@ skills/
 
 knowledge/
 ├── example-learning.md    # Template for capturing learnings
-├── edge-runtime-patterns.md  # Edge/serverless constraints & workarounds
+├── edge-runtime-patterns.md  # Cloudflare runtime choice (OpenNext vs edge) + constraints
 └── payment-integration.md    # Payment provider patterns & gotchas
 
 scripts/
@@ -203,10 +238,13 @@ scripts/
 examples/
 ├── monorepo-claude-md.md  # Real CLAUDE.md from a 12-project monorepo
 ├── project-claude-md.md   # Real CLAUDE.md from a deployed Next.js app
-└── real-handover.md       # Real HANDOVER.md from a production session
+├── real-handover.md       # Real HANDOVER.md from a production session
+└── session-walkthrough.md # A full session: skill auto-fires, handover cycle, rule capture
 
 docs/
 └── how-it-works.md        # Deep dive on each component
+
+CHANGELOG.md               # What changed, and when it was last verified
 ```
 
 ## Key Principles
@@ -271,7 +309,7 @@ A: Start with just `CLAUDE.md`. Add the rest when you feel the friction.
 A: The concepts (persistent context, session handover, decision frameworks) apply to any AI coding tool. The file format is Claude Code specific.
 
 **Q: What if my context window fills up mid-session?**
-A: Write a HANDOVER.md immediately. Include what you were doing, current state, and exact next steps. Start a new session, read the handover, delete it, and continue.
+A: Claude Code auto-compacts long sessions, but for a clean break write a HANDOVER.md: what you were doing, current state, exact next steps. Start a new session, read the handover, overwrite it with the new state, and continue.
 
 **Q: How do I know the system is working?**
 A: You'll notice: sessions start faster (no re-explaining), mistakes don't repeat (learned rules), decisions are consistent (skills), and context survives across sessions (handovers).
@@ -285,6 +323,7 @@ This repo is the **free starter kit** — enough to transform how you use Claude
 | CLAUDE.md template | Yes | Yes |
 | soul.md + PM handbook | Yes | Yes |
 | HANDOVER / DASHBOARD | Yes | Yes |
+| Hooks + Memory templates | Yes | (free addition) |
 | Decision framework skills | 4 | 4 |
 | Deploy checklist (CF/CR/Vercel) | — | With scripts |
 | Security scanner | — | With scripts |
@@ -292,14 +331,14 @@ This repo is the **free starter kit** — enough to transform how you use Claude
 | Cloud Run debug runbook | — | Yes |
 | Session relay system | — | Yes |
 | Safety modes (/careful, /freeze) | — | Yes |
-| HTML slide generator (12 presets) | — | Yes |
+| HTML slide generator (13 presets) | — | Yes |
 | SVG diagram skill | — | Yes |
 | X thread compiler | — | Yes |
 | Writing autopsy | — | Yes |
 | Anti-AI writing guide (EN + 中文) | — | Yes |
 | Vibe coding stack reference | — | Yes |
 | **Total skills** | **4** | **17** |
-| **Total files** | **19** | **40+** |
+| **Total files** | **24** | **55+** |
 
 **[Get the Pro version on Gumroad →](https://jazzpujols34.gumroad.com/l/claude-work-workflow)**
 

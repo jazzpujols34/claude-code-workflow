@@ -14,7 +14,7 @@
 # 4. Reload your shell:
 #      source ~/.zshrc
 #
-# That's it. Now you have: morning, status, evaluate, weekly, handover, learn
+# That's it. Now you have: morning, status, evaluate, weekly, handover, learn, audit
 # ──────────────────────────────────────────────────────────────────
 
 PROJECT_ROOT="$HOME/projects/your-project"

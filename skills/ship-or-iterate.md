@@ -6,7 +6,8 @@ description: Use when a project feels "almost done" and you need to decide wheth
 # Skill: Ship or Iterate?
 
 > Decide whether to ship current version or keep polishing.
-> Usage: `Read .claude/skills/ship-or-iterate.md and evaluate [project name]`
+> Auto-fires on "should I ship / is this ready" (see `description` above).
+> Manual override: `Read .claude/skills/ship-or-iterate.md and evaluate [project name]`
 
 ## The Question
 

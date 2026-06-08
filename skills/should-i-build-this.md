@@ -6,7 +6,8 @@ description: Use when evaluating a new project idea, side project, or feature to
 # Skill: Should I Build This?
 
 > Decision framework for evaluating new project ideas.
-> Usage: `Read .claude/skills/should-i-build-this.md and evaluate: "[your idea]"`
+> Auto-fires when you say things like "should I build X" (see `description` above).
+> Manual override: `Read .claude/skills/should-i-build-this.md and evaluate: "[your idea]"`
 
 ## Inputs Required
 
