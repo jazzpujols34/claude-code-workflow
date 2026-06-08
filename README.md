@@ -339,7 +339,7 @@ This repo is the **free starter kit** — enough to transform how you use Claude
 | Anti-AI writing guide (EN + 中文) | — | Yes |
 | Vibe coding stack reference | — | Yes |
 | **Total skills** | **4** | **17** |
-| **Total files** | **24** | **40+** |
+| **Total files** | **24** | **55+** |
 
 **[Get the Pro version on Gumroad →](https://jazzpujols34.gumroad.com/l/claude-work-workflow)**
 
