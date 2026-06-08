@@ -6,7 +6,8 @@ description: Use when prioritizing which project to work on next based on revenu
 # Skill: Revenue Potential Assessment
 
 > Evaluate which projects have the best path to cash flow.
-> Usage: `Read .claude/skills/revenue-potential.md and evaluate [project name]`
+> Auto-fires on "which project should I focus on / what makes money" (see `description` above).
+> Manual override: `Read .claude/skills/revenue-potential.md and evaluate [project name]`
 
 ## Inputs Required
 

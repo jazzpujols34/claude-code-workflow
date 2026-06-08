@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f HANDOVER.md ] && { echo '=== HANDOVER.md (baton from last session) ==='; cat HANDOVER.md; } || true",
+            "statusMessage": "Loading HANDOVER.md..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd=$(jq -r '.tool_input.command // empty'); printf '%s' \"$cmd\" | grep -Eq 'git +push[^&|]*(--force|-f([ =]|$))|rm +-rf +(/|~|\\*)' && { echo 'Guard: force-push or rm -rf blocked. Run it yourself if you really mean it.' >&2; exit 2; }; exit 0",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Before ending: (1) capture any correction as a Learned Rule in CLAUDE.md; (2) overwrite HANDOVER.md with the exact next step.'"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -6,7 +6,8 @@ description: Use before launching any product or feature to production. Checks i
 # Skill: MVP Launch Checklist
 
 > Run through this before launching any product.
-> Usage: `Read .claude/skills/mvp-launch-checklist.md and audit [project name]`
+> Auto-fires on "launch checklist / ready to launch / pre-launch" (see `description` above).
+> Manual override: `Read .claude/skills/mvp-launch-checklist.md and audit [project name]`
 
 ## Pre-Launch Checklist
 
@@ -19,7 +20,7 @@ description: Use before launching any product or feature to production. Checks i
 - [ ] **Deploy**: One-click deploy working (Vercel, Cloudflare, Render)
 
 ### Performance (Must Check)
-- [ ] **Lighthouse Score**: 70+ on all metrics
+- [ ] **Lighthouse Score**: 90+ on Best Practices/SEO/Accessibility; Performance 80+ (image/AI-heavy apps), 90+ otherwise
 - [ ] **Mobile**: Tested on actual phone, not just responsive mode
 - [ ] **Loading States**: No blank screens while data loads
 - [ ] **Error States**: Graceful handling when things break
@@ -58,5 +59,5 @@ If you've checked the Must Have items, SHIP. The rest can be iterated.
 
 - **Lighthouse on localhost lies.** Always test the deployed URL, not `localhost`. Cloudflare/Vercel add middleware that changes perf characteristics.
 - **"Tested on phone" means your actual phone.** Chrome DevTools responsive mode doesn't simulate real touch, real keyboard popups, or real network conditions.
-- **OG images break silently.** Test with Twitter Card Validator and Facebook Debugger — don't assume the meta tags work because they look right in the HTML.
+- **OG images break silently.** Test the live URL with an OG inspector (opengraph.xyz, or the platform debuggers you actually share to) — don't assume the meta tags work because they look right in the HTML. `og:image`/`og:url` must be absolute URLs.
 - **First user test: don't coach them.** Hand them the URL and watch. If you have to explain how to start, the onboarding is broken.

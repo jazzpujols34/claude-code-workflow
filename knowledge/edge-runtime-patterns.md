@@ -1,46 +1,65 @@
-# Knowledge: Edge Runtime Patterns
+# Knowledge: Cloudflare / Edge Runtime Patterns
 
-> Constraints and workarounds for deploying to edge runtimes (Cloudflare Workers/Pages, Vercel Edge).
-> Read this before: deploying API routes to edge, using KV/R2, or debugging edge-specific failures.
+> How to choose a runtime when deploying Next.js (and similar) to Cloudflare, and the
+> constraints that apply *only if you opt into the edge runtime*.
+> Read this before: deploying to Cloudflare, wiring KV/R2, or debugging a runtime-specific failure.
+> Last reviewed: June 2026.
 
-## Context
+## First decision: which runtime?
 
-Edge runtimes (Cloudflare Workers, Vercel Edge Functions) run in V8 isolates, not Node.js. This means no `fs`, no `path`, limited `crypto`, and no long-running processes. Every gotcha below was discovered through a production deployment.
+As of mid-2026 there are two real paths for Next.js on Cloudflare, and they have **opposite** rules. Pick one before writing any route.
 
-## The Pattern
+| | **OpenNext (recommended default)** | **Edge runtime (opt-in)** |
+|---|---|---|
+| Adapter | `@opennextjs/cloudflare` | `@cloudflare/next-on-pages` or raw Workers |
+| Runtime | **Node.js** (workerd `nodejs_compat`) | V8 isolate, Web-APIs only |
+| `export const runtime = 'edge'` | **Remove it** — the adapter rejects it | Required on every dynamic route |
+| Node built-ins (`node:crypto`, `Buffer`) | Available | Not available — use Web APIs |
+| Heavy SDKs (Stripe, etc.) | Work normally | Often too heavy — use `fetch` |
+| Best for | Most apps. Fewer constraints, normal Node code | Ultra-low-latency, globally-distributed handlers |
 
-### Key Constraints
+> Cloudflare now recommends OpenNext over next-on-pages, and next-on-pages only supports
+> the edge runtime. If you scaffolded a project before ~2025 with `export const runtime = 'edge'`
+> on every route, migrating to OpenNext means **deleting** those exports — leaving them in
+> breaks the OpenNext build.
+> Refs: [Cloudflare Next.js guide](https://developers.cloudflare.com/workers/framework-guides/web-apps/nextjs/) · [OpenNext](https://opennext.js.org/cloudflare)
+
+**If you're on OpenNext / Node runtime, most of the constraints below do not apply** — write normal Node code. The rest of this file is for the edge-runtime path.
+
+## Edge-runtime constraints (only when you opt into `runtime = 'edge'`)
+
+Edge runtimes run in V8 isolates, not Node.js: no `fs`, no `path`, no Node built-ins, no long-running processes. Every gotcha below was discovered through a production edge deployment.
 
 | What | Limit | Workaround |
 |------|-------|------------|
-| Bundle size | ~25 MB | Code split, tree shake, avoid heavy SDKs |
-| Execution time | ~30s before kill | Client-polling, not background jobs |
-| Memory | Shared across isolates | Use KV/R2, not in-memory state |
-| Node.js APIs | Limited subset | Use Web APIs (fetch, crypto.subtle, etc.) |
+| Bundle size | ~3 MB per Worker (compressed) | Code split, tree shake, avoid heavy SDKs |
+| CPU time | ~30s wall on a single request; long jobs get killed | Client-polling, not background jobs |
+| Memory | Not shared across isolates | Use KV/R2/D1, not in-memory state |
+| Node APIs | Web-APIs subset only | `fetch`, `crypto.subtle`, `TextEncoder`, etc. |
 
-### What Works
+### What works on edge
 
-**1. Client-Driven Polling (not fire-and-forget)**
+**1. Client-driven polling (not fire-and-forget)**
 
 ```
 POST /generate → return job ID → client polls /status/[id]
 ```
 
-Each poll checks external API, updates KV, returns status. Never rely on background execution.
+Each poll checks the external API, updates KV, returns status. Never rely on background execution surviving past the response.
 
-**2. KV for State (not in-memory)**
+**2. KV/D1 for state (not in-memory)**
 
 ```typescript
-// Edge isolates don't share memory. Use KV.
+// Edge isolates don't share memory. Persist it.
 await env.KV.put(`job:${id}`, JSON.stringify(data), { expirationTtl: 86400 })
 const result = JSON.parse(await env.KV.get(`job:${id}`))
 ```
 
-**3. Web Crypto (not Node crypto)**
+**3. Web Crypto (not Node crypto) — edge only**
 
 ```typescript
-// Node: crypto.createHmac('sha256', secret)
-// Edge:
+// Node runtime: import { createHmac } from 'node:crypto'  ← fine on OpenNext
+// Edge runtime: must use Web Crypto
 const key = await crypto.subtle.importKey(
   'raw', encoder.encode(secret),
   { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
@@ -48,36 +67,30 @@ const key = await crypto.subtle.importKey(
 const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(payload))
 ```
 
-**4. Route Runtime Export (Next.js on Cloudflare)**
+### What fails on edge (and is fine on Node/OpenNext)
 
 ```typescript
-// Every route MUST have this or build fails silently
-export const runtime = 'edge'
-```
-
-### What Doesn't Work
-
-```typescript
-// All of these fail on edge:
-import fs from 'fs'           // No filesystem
-import path from 'path'       // No path module
-globalThis.cache = new Map()  // Lost between requests
-setTimeout(() => {}, 5000)    // Killed after 30s
-import Stripe from 'stripe'  // SDK too heavy — use raw fetch
+import fs from 'fs'            // No filesystem on edge
+import path from 'path'        // No path module on edge
+globalThis.cache = new Map()   // Lost between requests on edge (isolates)
+setTimeout(() => {}, 60_000)   // Won't survive past the response on edge
+import Stripe from 'stripe'    // Too heavy for edge — use raw fetch; works fine on Node
 ```
 
 ### Why
 
-Edge isolates are designed for fast, stateless request handling. They spin up and down per-request. Anything that assumes persistence (memory, filesystem, long-running processes) will break.
+Edge isolates spin up and down per-request for fast, stateless handling. Anything that assumes persistence (memory, filesystem, long-running processes) breaks. The Node runtime (OpenNext) relaxes most of this — which is why it's the better default unless you specifically need edge.
 
-## Gotchas
+## Gotchas (apply to both paths unless noted)
 
-- `waitUntil()` exists but is unreliable for anything over a few seconds
-- Turbopack cache corruption causes phantom errors: fix with `rm -rf .next && npm run dev`
-- R2 presigned URLs expire — never store them in DB. Store the R2 key, generate URL at render time.
-- Some npm packages silently import Node.js modules. Check bundle with `npx wrangler deploy --dry-run`
+- `waitUntil()` exists but is unreliable for anything over a few seconds (edge).
+- Turbopack cache corruption causes phantom errors: `rm -rf .next && npm run dev`.
+- R2 presigned URLs expire — never store them in the DB. Store the R2 key, generate the URL at render time.
+- Some npm packages silently import Node built-ins. On edge, check the bundle with `npx wrangler deploy --dry-run`; on OpenNext, a failing build usually names the offending module.
+- Migrating off next-on-pages? Search-and-destroy every `export const runtime = 'edge'` first — that's the #1 OpenNext build break.
 
 ## References
 
+- [Deploy Next.js to Cloudflare (official guide)](https://developers.cloudflare.com/workers/framework-guides/web-apps/nextjs/)
+- [OpenNext — Cloudflare adapter](https://opennext.js.org/cloudflare)
 - [Cloudflare Workers Runtime APIs](https://developers.cloudflare.com/workers/runtime-apis/)
-- [Next.js Edge Runtime](https://nextjs.org/docs/app/api-reference/edge)

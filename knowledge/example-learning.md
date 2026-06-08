@@ -47,7 +47,7 @@ TEMPLATE INSTRUCTIONS:
 4. Add to CLAUDE.md's knowledge section so Claude knows to read it
 
 Example topics:
-- cloudflare-edge-patterns.md — Edge Runtime constraints
+- edge-runtime-patterns.md — Edge Runtime constraints
 - payment-integration.md — Stripe/ECPay setup
 - mobile-app-launch.md — iOS App Store submission
 - database-migrations.md — Schema change patterns

@@ -11,14 +11,16 @@ Payment integration is one of the most common "should NOT build from scratch" ar
 
 ### Provider Selection
 
-| Provider | Best For | Fees | Setup Time |
-|----------|----------|------|------------|
-| **Stripe** | International, SaaS | 2.9% + $0.30 | Instant (test), days (live) |
-| **ECPay** | Taiwan B2C | 2.75% credit | 1-2 weeks |
-| **Paddle** | SaaS (handles tax) | 5% + $0.50 | Days |
-| **LemonSqueezy** | Digital products | 5% + $0.50 | Instant |
+Fees drift — always confirm current rates on the provider's pricing page before quoting them. Snapshot below as of mid-2026, for relative comparison only.
 
-**Rule of thumb:** Stripe for most things. Local providers for local payment methods.
+| Provider | Best For | Fees (verify) | Setup Time |
+|----------|----------|------|------------|
+| **Stripe** | International, SaaS | ~2.9% + fixed | Instant (test), days (live) |
+| **ECPay** | Taiwan B2C | ~2.75% credit | 1-2 weeks |
+| **Paddle** | SaaS (merchant of record, handles tax) | ~5% + fixed | Days |
+| **LemonSqueezy** | Digital products (merchant of record) | ~5% + fixed | Instant |
+
+**Rule of thumb:** Stripe for most things; a merchant-of-record (Paddle/LemonSqueezy) when you want them to own sales tax/VAT; local providers for local payment methods.
 
 ### What Works
 
@@ -34,13 +36,16 @@ Never credit on redirect return. Users can close the tab.
 **2. Idempotent Webhooks**
 
 ```python
-# Always check if already processed
-existing = db.get_order(merchant_trade_no)
+# Always check if already processed, keyed on the provider's event/transaction id.
+# Return whatever ACK the provider expects (Stripe: HTTP 200; ECPay: the literal
+# body "1|OK"). The point is: a duplicate retry must be a no-op, not a double-credit.
+existing = db.get_order(transaction_id)
 if existing and existing.status == "paid":
-    return "1|OK"  # Already handled — return success
+    return ack_ok()  # already handled — ack so the provider stops retrying
 
 # Process payment...
-db.update_order(merchant_trade_no, status="paid")
+db.update_order(transaction_id, status="paid")
+return ack_ok()
 ```
 
 **3. Signature Verification**
@@ -92,5 +97,5 @@ Payment providers are asynchronous. The user's browser and the payment confirmat
 
 ## References
 
-- [Stripe Webhooks Best Practices](https://stripe.com/docs/webhooks/best-practices)
-- [Stripe Checkout Quickstart](https://stripe.com/docs/checkout/quickstart)
+- [Stripe Webhooks Best Practices](https://docs.stripe.com/webhooks)
+- [Stripe Checkout Quickstart](https://docs.stripe.com/checkout/quickstart)
