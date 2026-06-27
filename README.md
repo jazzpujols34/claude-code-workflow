@@ -1,5 +1,7 @@
 # Claude Code Workflow
 
+![Claude Code Workflow — conventions and memory so context compounds across sessions](docs/cover.jpg)
+
 Conventions, templates, and decision frameworks layered on top of Claude Code's native features (Skills, Hooks, Memory) — so your context compounds across sessions instead of resetting to zero.
 
 > **Last verified against Claude Code: June 2026.** See [CHANGELOG.md](CHANGELOG.md) for what changed.
